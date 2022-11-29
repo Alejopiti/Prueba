@@ -1,0 +1,191 @@
+﻿@model PruebaDALE.Models.Comprobante
+@using PruebaDALE.Models
+@{
+    ModeloPrueba db = new ModeloPrueba();
+    ViewBag.Title = "Detalles";
+    int Total = 0;
+}
+@{
+    using (ModeloPrueba db1 = new ModeloPrueba())
+    {
+        int idcliente = int.Parse(Model.Cliente);
+        ViewBag.NombreC = db.cliente.Find(idcliente).Nombre;
+        ViewBag.Cedula = db.cliente.Find(idcliente).Cedula;
+        ViewBag.Celular = db.cliente.Find(idcliente).Telefono;
+    }
+}
+<div class="row">
+    <div class="col-xs-12 alert alert" ">
+        <ul id="facturador-detalle" class="list-group">
+            <li class="list-group-item">
+                <div class="col-xs-10">
+                    <div class="pull-right">
+                        <h2>Factura # <strong>@Model.id</strong></h2>
+                    </div>
+                    <h4><strong>Empresa pruebal</strong></h4>
+                    <h5>Nit 000000</h5>
+                    <h5>Telefono 30000</h5>
+                    <h5>Direccioón Calle siempre viva</h5>
+                </div>
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12 alert alert">
+        <ul id="facturador-detalle" class="list-group">
+            <li class="list-group-item">
+                <h4 class="text-left"><strong>Datos Cliente</strong></h4>
+                <h5 class="text-left">Cliente : @ViewBag.NombreC</h5>
+                <h5 class="text-left">Celular : @ViewBag.Celular</h5>
+                <h5 class="text-left">Cedula : @ViewBag.Cedula</h5>
+                <h5 class="text-left">Fecha : @Model.Creado</h5>
+            </li>
+            <li class="list-group-item">
+                <div class="row">
+                    <div class="col-xs-6">
+                        <b>Descripcion</b>
+                    </div>
+                    <div class="col-xs-2 text-center">
+                        <b>Cantidad</b>
+                    </div>
+                    <div class="col-xs-2 text-right">
+                        <b>Precio</b>
+                    </div>
+                    <div class="col-xs-2 text-right">
+                        <b>Sub Total</b>
+                    </div>
+                </div>
+            </li>
+
+
+
+            @foreach (var d in Model.ComprobanteDetalle)
+            {
+                Total += (int)(d.Monto);
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col-xs-6">
+                            @db.producto.Find(d.ProductoId).Nombre
+                        </div>
+                        <div class="col-xs-2 text-center">
+                            @d.Cantidad
+                        </div>
+                        <div class="col-xs-2 text-right">
+                            @string.Format("{0:c}", d.PrecioUnitario)
+                        </div>
+                        <div class="col-xs-2 text-right">
+                            @string.Format("{0:c}", d.Monto)
+                        </div>
+                    </div>
+                </li>
+            }
+            @if (Model.Abono == true)
+            {
+                <li class="list-group-item text-left" style="font-size:18px;">
+                    <div class="col-xs-5">
+                        @if (Model.Vuelto == 0)
+                        {
+                            <p>
+                                Pendiente por cancelar: @string.Format(" {0:C0} ", Model.Total)
+                                <br />
+                                Comentarios: @Model.ComentariosFactura
+                            </p>
+
+                        }
+                        else
+                        {
+                            <p>
+                                Pendiente por cancelar: @string.Format(" {0:C0} ", Model.Vuelto)
+                                <br />
+                                Comentarios: @Model.Comentarios
+                            </p>
+                        }
+                        @if (Model.Comentarios != null)
+                        {
+                            <p>Comentarios: @Model.Comentarios</p>
+                        }
+                        else
+                        {
+                            <p>Sin Comentarios</p>
+                        }
+                        @if (Model.Efectivo != 0)
+                        {
+                            <p>Efectivo : @String.Format("{0:c}", Model.Efectivo)</p>
+                        }
+                        @if (Model.Nequi != 0)
+                        {
+                            <p>Nequi: @string.Format("{0:c}", Model.Nequi) <br /> Número celular: @Model.Ncelular </p>
+                        }
+                        @if (Model.Daviplata != 0)
+                        {
+                            <p>Daviplata: @string.Format("{0:c}", Model.Daviplata) <br /> Número celular: @Model.Ncelular </p>
+                        }
+                    </div>
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                </li>
+            }
+            else
+            {
+                <li class="list-group-item text-left">
+                    <div class="col-xs-5">
+
+                        <p>
+                            Pago completo
+                        </p>
+                        @if (Model.Comentarios != null)
+                        {
+                            <p>Comentarios: @Model.Comentarios</p>
+                        }
+                        else
+                        {
+                            <p>Sin Comentarios</p>
+                        }
+                        @if (Model.Efectivo != 0)
+                        {
+                            <p>Efectivo : @String.Format("{0:c}", Model.Efectivo)</p>
+                        }
+                        @if (Model.Nequi != 0)
+                        {
+                            <p>Nequi: @string.Format("{0:c}", Model.Nequi) <br /> Número celular: @Model.Ncelular </p>
+                        }
+                        @if (Model.Daviplata != 0)
+                        {
+                            <p>Daviplata: @string.Format("{0:c}", Model.Daviplata) <br /> Número celular: @Model.Ncelular </p>
+                        }
+                    </div>
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+                </li>
+            }
+            <li class="list-group-item text-right" style="font-size:18px;">
+                <div class="col-xs-10">
+                    Total
+                </div>
+                @string.Format("{0:C}", Total)
+            </li>
+
+        </ul>
+    </div>
+</div>
+
+

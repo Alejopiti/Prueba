@@ -1,0 +1,38 @@
+﻿@model IEnumerable<PruebaDALE.Models.producto>
+
+@{
+    ViewBag.Title = "Listado de productos";
+}
+
+<h2 class="text-center">@ViewBag.Title</h2>
+
+<p class="text-center">
+    @Html.ActionLink("Registrar nuevo", "Registrarproducto", "Home", null, new { @class = "btn btn-default" })
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Nombre)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Valor_unitario)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Nombre)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Valor_unitario)
+        </td>
+        <td>
+            @Html.ActionLink("Editar", "EditarProducto", new { id=item.id }) |
+            @Html.ActionLink("Eliminar", "EliminarProducto", new { id=item.id })
+        </td>
+    </tr>
+}
+
+</table>

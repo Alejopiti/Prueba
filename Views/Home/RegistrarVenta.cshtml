@@ -1,0 +1,380 @@
+﻿
+@model PruebaDALE.Models.ComprobanteViewModel
+@using PruebaDALE.Models;
+@{
+    ModeloPrueba db = new ModeloPrueba();
+    ViewBag.Title = "Registrar";
+    var MasMPagos = string.Empty;
+    var MasMPagos_3 = string.Empty;
+    var Tarjeta_Debito = string.Empty;
+    var Tarjeta_Credito = string.Empty;
+    var Nequi = string.Empty;
+    var Daviplata = string.Empty;
+    var Efectivo = string.Empty;
+    var Vuelto = string.Empty;
+    bool EnvioCorreo = false;
+
+}
+<br />
+<br />
+<h2 style="border-color:red;" class="alert alert page-header text-center">Nuevo Recibo</h2>
+<hr />
+@using (Html.BeginForm("RegistrarVenta", "Home", FormMethod.Post, new { id = "frm-comprobante" }))
+{
+    <div class="row">
+        <div style="border: double" class="col-xs-12 alert alert alert">
+            @*<div class="form-group">
+                    @Html.Label("Enviar factura por correo", htmlAttributes: new { @class = "control-label col-md-2" })
+                    <input type="checkbox" name="EnvioFC" value="false" class="form-control" />
+                </div>*@
+            <div class="form-group">
+                @Html.LabelFor(x => x.Cliente, htmlAttributes: new { @class = "control-label col-md-2" })
+                @*@Html.DropDownList("Cliente", null, htmlAttributes: new { @class = "form-control" })*@
+                @*<input name="Cliente" id="txtncliente" class="form-control" />*@
+                @Html.TextBoxFor(x => x.Cliente, new { @class = "form-control", placeholder = "Nombre del cliente", id = "txtnombrecliente" })
+                @Html.ValidationMessage("Cliente", null, new { @class = "label label-danger" })
+            </div>
+            <div class="col-md-offset-3">
+                <a target="_blank" href="/Home/RegistrarCliente" class="text-center btn btn-default glyphicon glyphicon-plus"> Registrar cliente</a>
+            </div>
+            <div class="well well-sm">
+                <div class="row">
+                    <div class="col-xs-7">
+                        @Html.HiddenFor(x => x.CabeceraProductoId)
+                        @Html.TextBoxFor(x => x.CabeceraProductoNombre, new { @class = "form-control", placeholder = "Buscar producto", id = "Producto" })
+                        @Html.ValidationMessage("producto_agregar", null, new { @class = "label label-danger" })
+                        <div>
+                            <a target="_blank" href="/Home/RegistrarProducto" class="btn btn-default glyphicon glyphicon-plus"> Registrar Producto</a>
+                        </div>
+                    </div>
+                    <div class="col-xs-2">
+                        @Html.TextBoxFor(x => x.CabeceraProductoCantidad, new { @class = "form-control", placeholder = "Cantidad" })
+                    </div>
+                    <div class="col-xs-2">
+                        <div class="input-group">
+                            <span class="input-group-addon" id="basic-addon1">$</span>
+                            @Html.TextBoxFor(x => x.CabeceraProductoPrecio, new { @class = "form-control", placeholder = "Precio" })
+                        </div>
+                    </div>
+                    <div class="col-xs-1">
+                        <button class="btn btn-default" type="submit" value="agregar_producto" name="action">
+                            <i class="glyphicon glyphicon-plus-sign"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <hr />
+            <ul id="facturador-detalle" class="list-group">
+                @if (Model.ComprobanteDetalle.Count > 0)
+                {
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-xs-1"></div>
+                            <div class="col-xs-5">
+                                <b>Producto</b>
+                            </div>
+                            <div class="col-xs-2 text-center">
+                                <b>Cantidad</b>
+                            </div>
+                            <div class="col-xs-2 text-right">
+                                <b>Precio Unitario</b>
+                            </div>
+                            <div class="col-xs-2 text-right">
+                                <b>Monto</b>
+                            </div>
+                        </div>
+                    </li>
+                }
+                @foreach (var d in Model.ComprobanteDetalle)
+                {
+                    var i = Model.ComprobanteDetalle.IndexOf(d);
+                    <li class="list-group-item">
+                        <!-- Modelo -->
+                        @Html.Hidden("ComprobanteDetalle[" + i + "].ProductoId", d.ProductoId)
+                        @Html.Hidden("ComprobanteDetalle[" + i + "].ProductoNombre", d.ProductoNombre)
+                        @Html.Hidden("ComprobanteDetalle[" + i + "].PrecioUnitario", d.PrecioUnitario)
+                        @Html.Hidden("ComprobanteDetalle[" + i + "].Cantidad", d.Cantidad)
+                        @Html.Hidden("ComprobanteDetalle[" + i + "].Retirar", d.Retirar, new { @class = "retirar" })
+                        <div class="row">
+                            <div class="col-xs-1 text-right">
+                                <button class="btn btn-danger btn-xs btn-block btn-retirar" type="submit" value="retirar_producto" name="action">
+                                    <i class="glyphicon glyphicon-remove"></i>
+                                </button>
+                            </div>
+                            <div class="col-xs-5">
+                                @d.ProductoNombre
+                            </div>
+                            <div class="col-xs-2 text-center">
+                                @d.Cantidad
+                            </div>
+                            <div class="col-xs-2 text-right">
+                                @string.Format("{0:c}", d.PrecioUnitario)
+                            </div>
+                            <div class="col-xs-2 text-right">
+                                @string.Format("{0:c}", d.Monto())
+                            </div>
+                        </div>
+                    </li>
+                }
+                @if (Model.ComprobanteDetalle.Count > 0)
+                {
+                    <li class="list-group-item text-right" style="font-size:18px;">
+                        @string.Format("{0:c}", Model.Total())
+                    </li>
+
+                }
+            </ul>
+
+            @Html.Hidden("Medio_PagoId", MasMPagos, new { @id = "Medio_PagoId" })
+            @Html.Hidden("Efectivo", Efectivo, new { @id = "Monto_1" })
+            @Html.Hidden("Nequi", Nequi, new { @id = "Monto_4" })
+            @Html.Hidden("Daviplata", Daviplata, new { @id = "Monto_5" })
+            @Html.Hidden("Vuelto", Vuelto, new { @id = "Vuelto" })
+            
+            <div class="form-group text-center">
+                @Html.LabelFor(model => model.Abono, htmlAttributes: new { @class = "control-label col-md-1" })
+                @Html.EditorFor(model => model.Abono, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Abono, "", new { @class = "text-danger" })
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.Medio_Pagoid, htmlAttributes: new { @class = "control-label col-md-2" })
+                @Html.DropDownList("Medio_Pagoid", null, htmlAttributes: new { @class = "form-control", @id = "txtMedioPago" })
+                @Html.ValidationMessageFor(model => model.Medio_Pagoid, "", new { @class = "text-danger" })
+
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Monto, htmlAttributes: new { @class = "control-label col-md-2" })
+                @Html.EditorFor(model => model.Monto, new { htmlAttributes = new { @class = "form-control", @id = "txtmonto" } })
+                @Html.ValidationMessageFor(model => model.Monto, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group" id="Ncelular" style="display:none">
+                @Html.Label("Celular", htmlAttributes: new { @class = "control-label col-md-2" })
+                @Html.EditorFor(model => model.Ncelular, new { htmlAttributes = new { @class = "form-control", @id = "txtNcelular" } })
+                @Html.ValidationMessageFor(model => model.Ncelular, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                @Html.Label("ComentariosFactura", htmlAttributes: new { @class = "control-label col-md-2" })
+                @Html.TextArea("ComentariosFactura", "", new { cols = "3", rows = "5", @class = "form-control", placeholder = "Comentarios de la facturación" })
+                @*@Html.EditorFor(model => model.ComentariosFactura, new { htmlAttributes = new { @class = "form-control", @id = "txtmonto" } })*@
+                @Html.ValidationMessageFor(model => model.ComentariosFactura, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                <i id="Mpago" class="col-xs-offset-3 btn btn-default glyphicon glyphicon-plus-sign"> Agregar Pago</i>
+            </div>
+            <div class="col-xs-4">
+                <h4>Efectivo</h4>
+                @*@string.Format("{0:c}", CantidadMP)*@
+                @Html.TextBox("Efectivo", "0", new { id = "Efectivo", @readonly = "readonly" })
+            </div>
+            <div class="col-xs-4">
+                <h4>Nequi</h4>
+                @Html.TextBox("Nequi", "0", new { @id = "Nequi", @readonly = "readonly" })
+            </div>
+            <div class="col-xs-4">
+                <h4>Daviplata</h4>
+                @Html.TextBox("Daviplata", "0", new { @id = "Daviplata", @readonly = "readonly" })
+            </div>
+            <div class="col-xs-4">
+                <h4>Saldo</h4>
+                @Html.TextBox("Vuelto", "0", new { @id = "Vuelto", @readonly = "readonly" })
+            </div>
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            @*@Html.Hidden("TipoTid", )*@
+            @if (Model.ComprobanteDetalle.Count > 0)
+            {
+                <button class="btn btn-default btn-block btn-lg" type="submit" value="generar" name="action">Generar comprobante</button>
+            }
+        </div>
+    </div>
+}
+
+
+@section Scripts{
+    <script>
+        $(function () {
+            $("#txtnombrecliente").autocomplete({
+                source: "/Home/BuscarCliente"
+            });
+        });
+    </script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="~/Scripts/jquery-ui/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/resources/demos/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+
+    <script>
+
+
+
+        var BotonMP = document.getElementById("Mpago")
+        BotonMP.addEventListener("click", CompletarPago);
+        MasMPagos = document.getElementById("txtMedioPago")
+        document.getElementById("Medio_PagoId").value = MasMPagos.value;
+        CantidadMP = document.getElementById("txtmonto")
+        Totales = @Model.Total();
+
+        $('#txtMedioPago').change(function () {
+            if (MasMPagos.value == 1) {
+                $("#Nctd").hide();
+                $("#Ncc").hide();
+                $('#TipoT').hide();
+                $('#Nctc').hide();
+                $('#Ncuotas').hide();
+                $("#Ncelular").hide();
+            }
+            else if (MasMPagos.value == 2) {
+                $("#Nctd").show();
+                $("#Ncc").hide();
+                $('#TipoT').hide();
+                $('#Nctc').hide();
+                $('#Ncuotas').hide();
+                $("#Ncelular").hide();
+            }
+            else if (MasMPagos.value == 3) {
+                $('#TipoT').show();
+                $('#Nctc').show();
+                $('#Ncuotas').show();
+                $("#Nctd").hide();
+                $("#Ncc").hide();
+                $("#Ncelular").hide();
+            }
+            else if (MasMPagos.value == 4) {
+
+                $("#Ncc").show();
+                $("#Ncelular").show();
+                $('#TipoT').hide();
+                $("#Nctd").hide();
+                $('#Nctc').hide();
+                $('#Ncuotas').hide();
+            }
+            else if (MasMPagos.value == 5) {
+
+                $("#Ndavi").show();
+                $("#Ncc").hide();
+                $("#Ncelular").show();
+                $('#TipoT').hide();
+                $("#Nctd").hide();
+                $('#Nctc').hide();
+                $('#Ncuotas').hide();
+            }
+        });
+
+        function CompletarPago() {
+
+            //Efectivo 1
+            if (MasMPagos.value == "1") {
+
+                Monto_1 = document.getElementById("txtmonto").value;
+                document.getElementById("Monto_1").value = CantidadMP.value;
+                document.getElementById("Efectivo").value = CantidadMP.value
+                document.getElementById("txtmonto").value = 0
+            }
+            // Nequi 
+            else if (MasMPagos.value == "4") {
+
+                Monto_4 = document.getElementById("txtmonto").value;
+                document.getElementById("Monto_4").value = CantidadMP.value
+                document.getElementById("Monto_4").value = Monto_4
+                document.getElementById("Nequi").value = CantidadMP.value
+                document.getElementById("txtmonto").value = 0
+            }
+            // Daviplata 
+            else if (MasMPagos.value == "5") {
+
+                Monto_5 = document.getElementById("txtmonto").value;
+                document.getElementById("Monto_5").value = CantidadMP.value
+                document.getElementById("Monto_5").value = Monto_5
+                document.getElementById("Daviplata").value = CantidadMP.value
+                document.getElementById("txtmonto").value = 0
+            }
+
+
+            efec  = parseInt(document.getElementById("Efectivo").value);
+            tarde = parseInt(document.getElementById("Tarjeta Debito").value);
+            tarcre = parseInt(document.getElementById("Tarjeta Credito").value);
+            TotalSum = efec + tarde + tarcre;
+            document.getElementById("Vuelto").value = ""
+            Resulta = TotalSum - Totales;
+            document.getElementById("Vuelto").value = Resulta
+            Vuelto = document.getElementById("Vuelto").value
+            $("#Nctd").hide();
+            $("#Nctd").hide();
+            $("#Ncc").hide();
+            $('#TipoT').hide();
+            $('#Nctc').hide();
+            $('#Ncuotas').hide();
+            $("#Ncelular").hide();
+            document.getElementById("txtMedioPago").value = 1;
+        }
+
+    </script>
+    <script>
+        $(document).ready(function () {
+            LimpiarAgregarProducto();
+
+            $(".btn-retirar").click(function () {
+                if (confirm('¿Está seguro de retirar el item seleccionado?')) {
+                    $(this).closest('.list-group-item').find('.retirar').val("True");
+                    return true;
+                }
+
+                return false;
+            })
+            $(function () {
+                /* Autocomplete de producto, jquery UI */
+                $("#Producto").autocomplete({
+                    dataType: 'JSON',
+                    source: function (request, response) {
+                        jQuery.ajax({
+                            url: '/Home/BuscarProducto',
+                            type: "post",
+                            dataType: "json",
+                            data: {
+                                nombre: request.term
+                            },
+                            success: function (data) {
+                                response($.map(data, function (item) {
+                                    return {
+                                        id: item.id,
+                                        value: item.Nombre,
+                                        Valor_unitario: item.Valor_unitario
+                                    }
+                                }))
+                            }
+                        })
+                    },
+                    select: function (e, ui) {
+                        $("#CabeceraProductoId").val(ui.item.id);
+                        $("#CabeceraProductoPrecio").val(ui.item.Valor_unitario);
+                        $("#CabeceraProductoCantidad").focus();
+                    }
+                })
+            })
+        });
+        function LimpiarAgregarProducto() {
+            $("#CabeceraProductoId").val("");
+            $("#Producto").val("");
+            $("#CabeceraProductoPrecio").val("");
+            $("#CabeceraProductoCantidad").val(1);
+        }
+
+    </script>
+}
+

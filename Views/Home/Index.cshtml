@@ -1,0 +1,22 @@
+﻿@{
+    ViewBag.Title = "Prueba Tecnica DALE";
+}
+
+<div class="jumbotron">
+    <h1 class="text-center">@ViewBag.Title</h1>    
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <h2>Clientes</h2>
+        @Html.ActionLink("Gestionar cliente", "Cliente", "Home", null, new { @class = "btn btn-default"})
+    </div>
+    <div class="col-md-4">
+        <h2>Productos</h2>
+        @Html.ActionLink("Gestionar productos", "Productos", "Home", null, new { @class = "btn btn-default" })
+    </div>
+    <div class="col-md-4">
+        <h2>Vender</h2>
+        @Html.ActionLink("Gestionar ventas", "RegistrarVenta", "Home", null, new { @class = "btn btn-default" })
+    </div>
+</div>
